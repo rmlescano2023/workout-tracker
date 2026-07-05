@@ -1,0 +1,121 @@
+// This file defines your database tables as "models".
+// Run `npm run prisma:migrate` after editing this to update your actual database.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum DaySlot {
+  DAY
+  NIGHT
+}
+
+enum ScheduleType {
+  GYM
+  RUN
+  REST
+}
+
+// A single exercise, e.g. "Inclined Dumbbell Press"
+model Exercise {
+  id            String            @id @default(cuid())
+  name          String
+  muscleGroup   String? // e.g. "Chest", "Back", "Legs"
+  equipmentType String? // e.g. "dumbbell", "machine_stack", "barbell" - drives overload increment rules
+  createdAt     DateTime          @default(now())
+
+  templateItems TemplateExercise[]
+  logs          ExerciseLog[]
+}
+
+// A reusable workout day template, e.g. "Chest, Shoulders & Triceps"
+model WorkoutTemplate {
+  id        String             @id @default(cuid())
+  name      String
+  createdAt DateTime           @default(now())
+
+  items     TemplateExercise[]
+  schedules WeeklySchedule[]
+}
+
+// One exercise's target sets/reps within a WorkoutTemplate, in order
+model TemplateExercise {
+  id          String   @id @default(cuid())
+  order       Int
+  targetSets  Int
+  repsMin     Int
+  repsMax     Int?
+  toFailure   Boolean  @default(false)
+  supersetTag String? // exercises sharing the same tag are one superset group
+
+  template    WorkoutTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  templateId  String
+  exercise    Exercise        @relation(fields: [exerciseId], references: [id])
+  exerciseId  String
+}
+
+// A type of run, e.g. "Base Run", "Tempo Run", "Interval Run", "LSD Run"
+model RunType {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+
+  schedules   WeeklySchedule[]
+  logs        RunLog[]
+}
+
+// The recurring weekly plan: for a given day-of-week + slot, what's scheduled.
+// dayOfWeek: 0 = Sunday ... 6 = Saturday, matching your sample table.
+model WeeklySchedule {
+  id                String        @id @default(cuid())
+  dayOfWeek         Int
+  slot              DaySlot
+  type              ScheduleType
+
+  workoutTemplate   WorkoutTemplate? @relation(fields: [workoutTemplateId], references: [id])
+  workoutTemplateId String?
+  runType           RunType?         @relation(fields: [runTypeId], references: [id])
+  runTypeId         String?
+
+  @@unique([dayOfWeek, slot])
+}
+
+// A phase of your running plan, e.g. "Weeks 1-10: Base Building"
+model RunningPlanPhase {
+  id          String   @id @default(cuid())
+  name        String
+  startDate   DateTime
+  endDate     DateTime
+  description String?
+}
+
+// Actual historical record of a completed set - this feeds progressive overload
+model ExerciseLog {
+  id         String   @id @default(cuid())
+  date       DateTime @default(now())
+  setNumber  Int
+  weightKg   Float?
+  reps       Int?
+  toFailure  Boolean  @default(false)
+  completed  Boolean  @default(true)
+
+  exercise   Exercise @relation(fields: [exerciseId], references: [id])
+  exerciseId String
+}
+
+// Actual historical record of a completed run
+model RunLog {
+  id          String   @id @default(cuid())
+  date        DateTime @default(now())
+  distanceKm  Float?
+  durationMin Int?
+  notes       String?
+
+  runType     RunType  @relation(fields: [runTypeId], references: [id])
+  runTypeId   String
+}
