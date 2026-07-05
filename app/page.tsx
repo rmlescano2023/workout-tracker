@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 
 // Notice this component is NOT marked "use client" - that makes it a
@@ -55,6 +56,9 @@ export default async function TodayPage() {
                   </li>
                 ))}
               </ul>
+              <Link href="/log">
+                <button>Log this workout</button>
+              </Link>
             </div>
           )}
 
