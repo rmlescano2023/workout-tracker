@@ -22,6 +22,7 @@ export default function RootLayout({
           <Link href="/">Today</Link>
           <Link href="/manage/exercises">Manage Exercises</Link>
           <Link href="/manage/workouts">Manage Workouts</Link>
+          <Link href="/manage/schedule">Manage Schedule</Link>
         </nav>
         {children}
       </body>
