@@ -25,7 +25,6 @@ export default function WorkoutTemplateEditor({
 }) {
   const [items, setItems] = useState<Item[]>(initialItems);
 
-  // --- Add form state ---
   const [selectedExerciseId, setSelectedExerciseId] = useState(exerciseOptions[0]?.id ?? "");
   const [targetSets, setTargetSets] = useState(3);
   const [repsMin, setRepsMin] = useState(10);
@@ -64,7 +63,6 @@ export default function WorkoutTemplateEditor({
     const a = items[index];
     const b = items[target];
 
-    // Swap their order values on the server...
     await Promise.all([
       fetch(`/api/workout-templates/${templateId}/items/${a.id}`, {
         method: "PATCH",
@@ -78,7 +76,6 @@ export default function WorkoutTemplateEditor({
       }),
     ]);
 
-    // ...and reflect it locally so the UI updates immediately
     const next = [...items];
     [next[index], next[target]] = [next[target], next[index]];
     setItems(next);
@@ -86,93 +83,111 @@ export default function WorkoutTemplateEditor({
 
   return (
     <div>
-      <h2 style={{ fontSize: "1.1rem" }}>Exercises in this workout</h2>
+      <h2>Exercises in this workout</h2>
 
-      <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "1.5rem" }}>
-        <thead>
-          <tr style={{ textAlign: "left", borderBottom: "1px solid #444" }}>
-            <th style={{ padding: "0.4rem 0" }}>Exercise</th>
-            <th>Sets</th>
-            <th>Reps</th>
-            <th>To failure</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          {items.map((item, i) => (
-            <tr key={item.id} style={{ borderBottom: "1px solid #333" }}>
-              <td style={{ padding: "0.4rem 0" }}>{item.exercise.name}</td>
-              <td>{item.targetSets}</td>
-              <td>
-                {item.repsMin}
-                {item.repsMax ? `-${item.repsMax}` : ""}
-              </td>
-              <td>{item.toFailure ? "Yes" : "No"}</td>
-              <td>
-                <button onClick={() => handleMove(i, -1)} disabled={i === 0}>
-                  ↑
-                </button>{" "}
-                <button onClick={() => handleMove(i, 1)} disabled={i === items.length - 1}>
-                  ↓
-                </button>{" "}
-                <button onClick={() => handleDelete(item.id)}>Remove</button>
-              </td>
+      <div className="table-wrap mb-6">
+        <table>
+          <thead>
+            <tr>
+              <th>Exercise</th>
+              <th>Sets</th>
+              <th>Reps</th>
+              <th>To failure</th>
+              <th></th>
             </tr>
-          ))}
-        </tbody>
-      </table>
-
-      {items.length === 0 && <p style={{ color: "#888" }}>No exercises added yet.</p>}
-
-      <h2 style={{ fontSize: "1.1rem" }}>Add an exercise</h2>
-      {exerciseOptions.length === 0 ? (
-        <p style={{ color: "#888" }}>
-          You haven&apos;t created any exercises yet - go to Manage Exercises first.
-        </p>
-      ) : (
-        <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", flexWrap: "wrap" }}>
-          <select value={selectedExerciseId} onChange={(e) => setSelectedExerciseId(e.target.value)}>
-            {exerciseOptions.map((ex) => (
-              <option key={ex.id} value={ex.id}>
-                {ex.name}
-              </option>
+          </thead>
+          <tbody>
+            {items.map((item, i) => (
+              <tr key={item.id}>
+                <td className="text-ink">{item.exercise.name}</td>
+                <td className="text-ink-dim tabular-nums">{item.targetSets}</td>
+                <td className="text-ink-dim tabular-nums">
+                  {item.repsMin}
+                  {item.repsMax ? `-${item.repsMax}` : ""}
+                </td>
+                <td className="text-ink-dim">{item.toFailure ? "Yes" : "No"}</td>
+                <td>
+                  <div className="flex gap-1 justify-end">
+                    <button className="btn btn-ghost btn-icon" onClick={() => handleMove(i, -1)} disabled={i === 0}>
+                      ↑
+                    </button>
+                    <button
+                      className="btn btn-ghost btn-icon"
+                      onClick={() => handleMove(i, 1)}
+                      disabled={i === items.length - 1}
+                    >
+                      ↓
+                    </button>
+                    <button className="btn btn-danger" onClick={() => handleDelete(item.id)}>
+                      Remove
+                    </button>
+                  </div>
+                </td>
+              </tr>
             ))}
-          </select>
-          <label>
-            Sets{" "}
-            <input
-              type="number"
-              value={targetSets}
-              onChange={(e) => setTargetSets(parseInt(e.target.value, 10) || 1)}
-              style={{ width: "3.5rem" }}
-            />
-          </label>
-          <label>
-            Reps min{" "}
-            <input
-              type="number"
-              value={repsMin}
-              onChange={(e) => setRepsMin(parseInt(e.target.value, 10) || 1)}
-              style={{ width: "3.5rem" }}
-            />
-          </label>
-          <label>
-            Reps max{" "}
-            <input
-              type="number"
-              value={repsMax}
-              onChange={(e) => setRepsMax(e.target.value === "" ? "" : parseInt(e.target.value, 10))}
-              style={{ width: "3.5rem" }}
-            />
-          </label>
-          <label>
-            <input type="checkbox" checked={toFailure} onChange={(e) => setToFailure(e.target.checked)} /> to failure
-          </label>
-          <button onClick={handleAdd} disabled={adding}>
-            {adding ? "Adding..." : "Add"}
-          </button>
-        </div>
-      )}
+          </tbody>
+        </table>
+      </div>
+
+      {items.length === 0 && <p className="empty-note mb-4">No exercises added yet.</p>}
+
+      <div className="card">
+        <h2>Add an exercise</h2>
+        {exerciseOptions.length === 0 ? (
+          <p className="empty-note">You haven&apos;t created any exercises yet - go to Manage Exercises first.</p>
+        ) : (
+          <div className="flex flex-wrap items-end gap-3">
+            <div className="min-w-[10rem] flex-1">
+              <label className="field-label">Exercise</label>
+              <select
+                value={selectedExerciseId}
+                onChange={(e) => setSelectedExerciseId(e.target.value)}
+                className="input"
+              >
+                {exerciseOptions.map((ex) => (
+                  <option key={ex.id} value={ex.id}>
+                    {ex.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="field-label">Sets</label>
+              <input
+                type="number"
+                value={targetSets}
+                onChange={(e) => setTargetSets(parseInt(e.target.value, 10) || 1)}
+                className="input w-16"
+              />
+            </div>
+            <div>
+              <label className="field-label">Reps min</label>
+              <input
+                type="number"
+                value={repsMin}
+                onChange={(e) => setRepsMin(parseInt(e.target.value, 10) || 1)}
+                className="input w-16"
+              />
+            </div>
+            <div>
+              <label className="field-label">Reps max</label>
+              <input
+                type="number"
+                value={repsMax}
+                onChange={(e) => setRepsMax(e.target.value === "" ? "" : parseInt(e.target.value, 10))}
+                className="input w-16"
+              />
+            </div>
+            <label className="flex items-center gap-1.5 text-xs text-ink-dim pb-2.5 whitespace-nowrap">
+              <input type="checkbox" checked={toFailure} onChange={(e) => setToFailure(e.target.checked)} className="checkbox" />
+              to failure
+            </label>
+            <button className="btn btn-primary" onClick={handleAdd} disabled={adding}>
+              {adding ? "Adding…" : "Add"}
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

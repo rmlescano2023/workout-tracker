@@ -1,16 +1,6 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 
-// Notice this component is NOT marked "use client" - that makes it a
-// "Server Component" by default in Next.js. It runs only on the server,
-// so it can query the database directly, right here, with no API call
-// needed. The HTML it produces is what gets sent to the browser.
-//
-// Later, when we build interactive bits (checking off a set, a button
-// that logs weight), THOSE specific small components will need
-// "use client" at the top, because they need to run in the browser to
-// respond to clicks. But this page itself doesn't need that.
-
 const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
 export default async function TodayPage() {
@@ -25,46 +15,60 @@ export default async function TodayPage() {
     orderBy: { slot: "asc" },
   });
 
+  const cardAccent = { GYM: "card-gym", RUN: "card-run", REST: "card-rest" } as const;
+  const badgeAccent = { GYM: "badge-gym", RUN: "badge-run", REST: "badge-rest" } as const;
+
   return (
     <main>
-      <h1>Today - {DAY_NAMES[dayOfWeek]}</h1>
+      <p className="eyebrow mb-1">{DAY_NAMES[dayOfWeek]}</p>
+      <h1>Today</h1>
 
-      {schedule.length === 0 && <p>Nothing scheduled today. Rest day, or the schedule hasn&apos;t been set up yet.</p>}
+      {schedule.length === 0 && (
+        <p className="empty-note">Nothing scheduled today. Rest day, or the schedule hasn&apos;t been set up yet.</p>
+      )}
 
-      {schedule.map((entry) => (
-        <section key={entry.id} style={{ marginBottom: "2rem" }}>
-          <h2>{entry.slot === "DAY" ? "☀️ Day" : "🌙 Night"}</h2>
-
-          {entry.type === "RUN" && entry.runType && (
-            <p>
-              🏃 <strong>{entry.runType.name}</strong>
-              {entry.runType.description && <> - {entry.runType.description}</>}
-            </p>
-          )}
-
-          {entry.type === "GYM" && entry.workoutTemplate && (
-            <div>
-              <p>
-                🏋️ <strong>{entry.workoutTemplate.name}</strong>
-              </p>
-              <ul>
-                {entry.workoutTemplate.items.map((item) => (
-                  <li key={item.id}>
-                    {item.exercise.name} - {item.targetSets} sets x {item.repsMin}
-                    {item.repsMax ? `-${item.repsMax}` : ""} reps
-                    {item.toFailure ? " (to failure)" : ""}
-                  </li>
-                ))}
-              </ul>
-              <Link href="/log">
-                <button>Log this workout</button>
-              </Link>
+      <div className="flex flex-col gap-4">
+        {schedule.map((entry) => (
+          <section key={entry.id} className={`card ${cardAccent[entry.type]}`}>
+            <div className="flex items-center justify-between mb-2">
+              <span className="eyebrow">{entry.slot === "DAY" ? "☀ Day" : "🌙 Night"}</span>
+              <span className={`badge ${badgeAccent[entry.type]}`}>{entry.type}</span>
             </div>
-          )}
 
-          {entry.type === "REST" && <p>💤 Rest</p>}
-        </section>
-      ))}
+            {entry.type === "RUN" && entry.runType && (
+              <p className="text-ink">
+                <span className="font-display text-lg">{entry.runType.name}</span>
+                {entry.runType.description && (
+                  <span className="text-ink-dim"> — {entry.runType.description}</span>
+                )}
+              </p>
+            )}
+
+            {entry.type === "GYM" && entry.workoutTemplate && (
+              <div>
+                <p className="font-display text-lg mb-2">{entry.workoutTemplate.name}</p>
+                <ul className="flex flex-col gap-1 mb-4">
+                  {entry.workoutTemplate.items.map((item) => (
+                    <li key={item.id} className="text-sm text-ink-dim flex justify-between border-b border-line py-1.5 last:border-0">
+                      <span className="text-ink">{item.exercise.name}</span>
+                      <span className="tabular-nums">
+                        {item.targetSets} × {item.repsMin}
+                        {item.repsMax ? `-${item.repsMax}` : ""}
+                        {item.toFailure ? " (failure)" : ""}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+                <Link href="/log">
+                  <button className="btn btn-primary w-full sm:w-auto">Log this workout</button>
+                </Link>
+              </div>
+            )}
+
+            {entry.type === "REST" && <p className="text-ink-dim">Recovery day. Nothing logged here.</p>}
+          </section>
+        ))}
+      </div>
     </main>
   );
 }

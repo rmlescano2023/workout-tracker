@@ -1,0 +1,179 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    @apply bg-bg text-ink font-body antialiased;
+  }
+
+  h1,
+  h2,
+  h3 {
+    @apply font-display uppercase tracking-wide text-ink;
+  }
+
+  h1 {
+    @apply text-2xl mb-4;
+  }
+
+  h2 {
+    @apply text-base mb-3 text-ink-dim;
+  }
+
+  h3 {
+    @apply text-base mb-1;
+  }
+
+  /* Numbers (weights, reps, sets) line up better with tabular figures -
+     this matters in a lifting log where you're scanning columns fast. */
+  input[type="number"] {
+    font-variant-numeric: tabular-nums;
+  }
+
+  a {
+    @apply text-ink underline-offset-4 decoration-ink-faint hover:decoration-ink transition-colors;
+  }
+}
+
+@layer components {
+  /* Card: the base unit of the whole app. Left accent bar carries meaning
+     (gym / run / rest) rather than decorating - see .card-gym etc. */
+  .card {
+    @apply relative bg-surface border border-line rounded shadow-card pl-4 pr-4 py-4 sm:pl-5 sm:pr-5;
+  }
+
+  .card::before {
+    content: "";
+    @apply absolute left-0 top-0 bottom-0 w-[3px] rounded-l bg-surface-3;
+  }
+
+  .card-gym::before {
+    @apply bg-gym;
+  }
+
+  .card-run::before {
+    @apply bg-run;
+  }
+
+  .card-rest::before {
+    @apply bg-rest;
+  }
+
+  .eyebrow {
+    @apply font-display uppercase tracking-widest text-xs text-ink-dim;
+  }
+
+  .badge {
+    @apply inline-flex items-center gap-1.5 font-display uppercase tracking-wide text-xs px-2 py-1 rounded-sm;
+  }
+
+  .badge-gym {
+    @apply bg-gym-soft text-gym;
+  }
+
+  .badge-run {
+    @apply bg-run-soft text-run;
+  }
+
+  .badge-rest {
+    @apply bg-rest-soft text-rest;
+  }
+
+  /* Buttons */
+  .btn {
+    @apply inline-flex items-center justify-center gap-1.5 font-display uppercase tracking-wide text-xs
+      rounded-sm px-3 py-2 border border-surface-3 bg-surface-2 text-ink
+      hover:bg-surface-3 active:translate-y-px transition-colors
+      disabled:opacity-40 disabled:pointer-events-none;
+  }
+
+  .btn-primary {
+    @apply bg-gym border-gym text-ink hover:bg-gym-dim hover:border-gym-dim;
+  }
+
+  .btn-ghost {
+    @apply border-transparent bg-transparent hover:bg-surface-2;
+  }
+
+  .btn-danger {
+    @apply border-transparent bg-transparent text-ink-dim hover:text-gym hover:bg-gym-soft;
+  }
+
+  .btn-icon {
+    @apply px-2;
+  }
+
+  /* Form controls */
+  .field-label {
+    @apply block text-xs text-ink-dim mb-1;
+  }
+
+  .input {
+    @apply bg-bg border border-surface-3 rounded-sm px-2.5 py-2 text-sm text-ink placeholder:text-ink-faint
+      focus:outline-none focus:border-ink-dim transition-colors w-full;
+  }
+
+  select.input {
+    @apply appearance-none bg-no-repeat;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%239B9C9F'/%3E%3C/svg%3E");
+    background-position: right 0.7rem center;
+    padding-right: 1.75rem;
+  }
+
+  .checkbox {
+    @apply h-4 w-4 rounded-sm border border-surface-3 bg-bg accent-gym;
+  }
+
+  /* Table wrapper - horizontally scrollable on small screens instead of
+     squashing columns */
+  .table-wrap {
+    @apply -mx-4 sm:mx-0 overflow-x-auto;
+  }
+
+  table {
+    @apply w-full text-sm border-collapse min-w-[520px] sm:min-w-0;
+  }
+
+  thead th {
+    @apply text-left text-xs uppercase tracking-wide text-ink-dim font-display font-normal
+      border-b border-line pb-2 px-4 sm:px-2 first:pl-4 sm:first:pl-0;
+  }
+
+  tbody td {
+    @apply border-b border-line py-2.5 px-4 sm:px-2 first:pl-4 sm:first:pl-0 align-middle;
+  }
+
+  tbody tr:hover {
+    @apply bg-surface-2/40;
+  }
+
+  .empty-note {
+    @apply text-ink-faint text-sm py-2;
+  }
+
+  .error-note {
+    @apply text-gym text-sm py-1;
+  }
+
+  .success-note {
+    @apply text-run text-sm py-1;
+  }
+
+  /* Plate chip: the signature interaction element, used for marking a set
+     done in the Log Workout flow. Outlined "plate" that fills solid when
+     the set is complete - a small nod to the object it represents. */
+  .plate-chip {
+    @apply relative h-9 w-9 shrink-0 rounded-full border-2 border-surface-3 text-ink-dim
+      flex items-center justify-center text-xs font-display transition-colors cursor-pointer
+      hover:border-ink-faint;
+  }
+
+  .plate-chip[data-done="true"] {
+    @apply bg-gym border-gym text-ink;
+  }
+}

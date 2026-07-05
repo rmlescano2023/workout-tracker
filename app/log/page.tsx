@@ -17,14 +17,11 @@ export default async function LogPage() {
     return (
       <main>
         <h1>Log Workout</h1>
-        <p>No gym workout scheduled for today.</p>
+        <p className="empty-note">No gym workout scheduled for today.</p>
       </main>
     );
   }
 
-  // For each exercise, find the most recent logged weight so the form can
-  // pre-fill it - this is what makes progressive overload possible later:
-  // we need history to compare against.
   const exercises: ExerciseForLog[] = await Promise.all(
     gymSchedule.workoutTemplate.items.map(async (item) => {
       const lastLog = await prisma.exerciseLog.findFirst({
@@ -46,7 +43,8 @@ export default async function LogPage() {
 
   return (
     <main>
-      <h1>Log Workout - {gymSchedule.workoutTemplate.name}</h1>
+      <p className="eyebrow mb-1">{gymSchedule.workoutTemplate.name}</p>
+      <h1>Log Workout</h1>
       <LogWorkoutForm exercises={exercises} />
     </main>
   );

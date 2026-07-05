@@ -26,7 +26,6 @@ export default function WorkoutTemplatesList({ initialTemplates }: { initialTemp
     });
     const { template } = await res.json();
     setCreating(false);
-    // Jump straight into editing the new template so you can add exercises right away
     router.push(`/manage/workouts/${template.id}`);
   }
 
@@ -43,39 +42,33 @@ export default function WorkoutTemplatesList({ initialTemplates }: { initialTemp
 
   return (
     <div>
-      <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1.5rem" }}>
+      <div className="flex flex-col sm:flex-row gap-2 mb-5">
         <input
           placeholder="New workout name (e.g. Back & Triceps)"
           value={newName}
           onChange={(e) => setNewName(e.target.value)}
-          style={{ width: "20rem" }}
+          className="input sm:max-w-xs"
         />
-        <button onClick={handleCreate} disabled={creating || !newName.trim()}>
-          {creating ? "Creating..." : "Create"}
+        <button className="btn btn-primary shrink-0" onClick={handleCreate} disabled={creating || !newName.trim()}>
+          {creating ? "Creating…" : "Create"}
         </button>
       </div>
 
-      <ul style={{ listStyle: "none", padding: 0 }}>
+      <ul className="flex flex-col">
         {templates.map((t) => (
-          <li
-            key={t.id}
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              padding: "0.6rem 0",
-              borderBottom: "1px solid #333",
-            }}
-          >
-            <Link href={`/manage/workouts/${t.id}`}>
-              {t.name} <span style={{ color: "#888" }}>({t._count.items} exercises)</span>
+          <li key={t.id} className="flex items-center justify-between py-3 border-b border-line last:border-0">
+            <Link href={`/manage/workouts/${t.id}`} className="no-underline hover:underline">
+              <span className="text-ink">{t.name}</span>{" "}
+              <span className="text-ink-faint text-sm">({t._count.items} exercises)</span>
             </Link>
-            <button onClick={() => handleDelete(t.id)}>Delete</button>
+            <button className="btn btn-danger" onClick={() => handleDelete(t.id)}>
+              Delete
+            </button>
           </li>
         ))}
       </ul>
 
-      {templates.length === 0 && <p style={{ color: "#888" }}>No workout templates yet - create your first one above.</p>}
+      {templates.length === 0 && <p className="empty-note">No workout templates yet - create your first one above.</p>}
     </div>
   );
 }
