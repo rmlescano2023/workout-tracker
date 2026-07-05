@@ -21,6 +21,7 @@ export default function RootLayout({
         <nav style={{ display: "flex", gap: "1rem", marginBottom: "2rem", borderBottom: "1px solid #333", paddingBottom: "1rem" }}>
           <Link href="/">Today</Link>
           <Link href="/manage/exercises">Manage Exercises</Link>
+          <Link href="/manage/workouts">Manage Workouts</Link>
         </nav>
         {children}
       </body>
